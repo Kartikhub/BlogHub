@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client/extension";
+import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
 import { sign } from "hono/jwt";
@@ -13,22 +13,20 @@ export const userRouter = new Hono<{
     }
 }>();
 
-// userRouter.use('/*', async (c, next) => {
-//     console.log("Inside middleware")
-//     const prisma = new PrismaClient({
-//       datasourceUrl: c.env?.DATABASE_URL, 
-//     }).$extends(withAccelerate()) ;
-//     // @ts-ignore
-//     c.set('prismaClient', prisma);
-//     await next()
-//   })
+userRouter.use('/*', async (c, next) => {
+    console.log("Inside middleware")
+    const prisma = new PrismaClient({
+      datasourceUrl: c.env?.DATABASE_URL, 
+    }).$extends(withAccelerate()) ;
+    // @ts-ignore
+    c.set('prismaClient', prisma);
+    await next()
+  })
+
+
 
 userRouter.post('/signup', async (c) => {
-    // const prisma = c.get('prismaClient');
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env?.DATABASE_URL, 
-      }).$extends(withAccelerate()) ;
-  
+    const prisma = c.get('prismaClient');
     const body = await c.req.json();
     console.log('prisma body')
     try {
@@ -40,7 +38,7 @@ userRouter.post('/signup', async (c) => {
         }
       })
       const jwt = await sign({ id: user.id }, c.env.JWT_SECRET);
-  
+      c.status(200);
       return c.json({ jwt });
     } catch (e) {
       c.status(403);
@@ -50,11 +48,8 @@ userRouter.post('/signup', async (c) => {
   
   
   userRouter.post('/signin', async (c) => {
-    // const prisma = c.get('prismaClient');
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env?.DATABASE_URL, 
-      }).$extends(withAccelerate()) ;
-      
+    const prisma = c.get('prismaClient');
+    
     const body = await c.req.json();
     const user = await prisma.user.findUnique({
       where: {
@@ -68,6 +63,7 @@ userRouter.post('/signup', async (c) => {
     }
     console.log(user.id);
     const jwt = await sign({id: user.id}, c.env.JWT_SECRET);
-    return c.json ({ jwt });
+    c.status(200);
+    return c.json({ jwt });
   
   })
