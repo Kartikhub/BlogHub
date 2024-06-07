@@ -5,7 +5,7 @@ compatibility_date = "2023-12-01"
 # MY_VAR = "my-variable"
 DATABASE_URL = <PRISMA_URL>
 
-JWT_SECRET = "my secret"
+JWT_SECRET = "<JWT_SECRET>"
  
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"

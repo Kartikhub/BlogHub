@@ -1,3 +1,4 @@
+import { signinInput, signupInput } from "@kartikhub/blog-common";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
@@ -28,6 +29,13 @@ userRouter.use('/*', async (c, next) => {
 userRouter.post('/signup', async (c) => {
     const prisma = c.get('prismaClient');
     const body = await c.req.json();
+    const { success } = signupInput.safeParse(body);
+    if (!success) {
+      c.status(411);
+      return c.json({
+        message: "Input credentials are incorrect"
+      })
+    }
     console.log('prisma body')
     try {
       const user = await prisma.user.create({
@@ -51,6 +59,13 @@ userRouter.post('/signup', async (c) => {
     const prisma = c.get('prismaClient');
     
     const body = await c.req.json();
+    const { success } = signinInput.safeParse(body);
+    if (!success) {
+      c.status(411);
+      return c.json({
+        message: "Input credentials are incorrect"
+      })
+    }
     const user = await prisma.user.findUnique({
       where: {
         email: body.email,

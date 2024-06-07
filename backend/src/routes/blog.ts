@@ -1,3 +1,4 @@
+import { createBlogInput } from "@kartikhub/blog-common";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
@@ -33,17 +34,27 @@ blogRouter.use('/*', async (c, next) => {
         return c.json({ error: "Unauthorized" });
     }
     const token = jwt.split(' ')[1];
-    const payload = await verify(token, c.env.JWT_SECRET)
-    if (!payload) {
+    try {
+        const payload = await verify(token, c.env.JWT_SECRET)
+        c.set('userId', payload.id as string);
+        await next();
+    } catch (e) {
         c.status(401)
         return c.json({ error: "unauthorized" });
     }
-    c.set('userId', payload.id as string);
-    await next();
+
+
 })
 
 blogRouter.post('/', async (c) => {
     const body = await c.req.json();
+    const { success } = createBlogInput.safeParse(body);
+    if (!success) {
+        c.status(411);
+        return c.json({
+            message: "Input details are incorrect"
+        })
+    }
     const prisma = c.get('prismaClient');
     try {
         const post = await prisma.post.create({
@@ -59,16 +70,23 @@ blogRouter.post('/', async (c) => {
         });
     } catch (e) {
         c.status(411);
-        c.json({
+        return c.json({
             error: "error while creating the blog post "
         })
     }
 })
     .put(async (c) => {
         const body = await c.req.json();
+        const { success } = createBlogInput.safeParse(body);
+        if (!success) {
+            c.status(411);
+            return c.json({
+                message: "Input details are incorrect"
+            })
+        }
         const prisma = c.get('prismaClient');
         try {
-            const post = await prisma.post.update({
+            const update = await prisma.post.update({
                 where: {
                     id: body.id,
                     authorId: c.get('userId')
@@ -76,14 +94,15 @@ blogRouter.post('/', async (c) => {
                 data: {
                     title: body.title,
                     content: body.content,
+                    authorId: c.get('userId')
                 }
             })
             c.status(200);
-            return c.text("Updated the blog post");
+            return c.json({ update });
         } catch (e) {
             c.status(411);
-            c.json({
-                error: "error while creating the blog post "
+            return c.json({
+                error: "error while creating the blog post"
             })
         }
     })
@@ -93,14 +112,14 @@ blogRouter.get('/:id', async (c) => {
     const prisma = c.get('prismaClient');
 
     try {
-        const post = await prisma.post.findFirst({
+        const blog = await prisma.post.findFirst({
             where: {
                 id: id
             }
         })
         c.status(200);
         return c.json({
-            post
+            blog
         });
     } catch (e) {
         c.status(411);
