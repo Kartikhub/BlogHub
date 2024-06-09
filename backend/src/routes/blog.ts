@@ -107,6 +107,35 @@ blogRouter.post('/', async (c) => {
         }
     })
 
+// TODO: Pagination
+blogRouter.get('/bulk', async (c) => {
+    const prisma = c.get('prismaClient');
+
+    try {
+        const posts = await prisma.post.findMany({
+            select: {
+                id: true,
+                content: true,
+                title: true,
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        })
+        c.status(200);
+        return c.json({
+            posts
+        });
+    } catch (e) {
+        c.status(411);
+        return c.json({
+            error: "Unable to fetch the blog"
+        })
+    }
+})
+
 blogRouter.get('/:id', async (c) => {
     const id = c.req.param('id')
     const prisma = c.get('prismaClient');
@@ -115,6 +144,16 @@ blogRouter.get('/:id', async (c) => {
         const blog = await prisma.post.findFirst({
             where: {
                 id: id
+            },
+            select: {
+                id: true,
+                content: true,
+                title: true,
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
         c.status(200);
@@ -129,20 +168,3 @@ blogRouter.get('/:id', async (c) => {
     }
 })
 
-// TODO: Pagination
-blogRouter.get('/bulk', async (c) => {
-    const prisma = c.get('prismaClient');
-
-    try {
-        const posts = await prisma.post.findMany()
-        c.status(200);
-        return c.json({
-            posts
-        });
-    } catch (e) {
-        c.status(411);
-        return c.json({
-            error: "Unable to fetch the blog"
-        })
-    }
-})
