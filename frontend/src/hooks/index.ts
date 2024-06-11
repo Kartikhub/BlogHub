@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react"
 import { BACKEND_URL } from "../config";
 
-interface Blog {
+export interface Blog {
     "id": string,
     "content": string,
     "title": string,
@@ -24,7 +24,7 @@ export const useBlog = ({id}: {id: string}) => {
             }
         })
             .then(response => {
-                setBlog(response.data.posts);
+                setBlog(response.data.post);
                 setLoading(false);
             })
         

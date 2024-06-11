@@ -141,7 +141,7 @@ blogRouter.get('/:id', async (c) => {
     const prisma = c.get('prismaClient');
 
     try {
-        const blog = await prisma.post.findFirst({
+        const post = await prisma.post.findFirst({
             where: {
                 id: id
             },
@@ -158,7 +158,7 @@ blogRouter.get('/:id', async (c) => {
         })
         c.status(200);
         return c.json({
-            blog
+            post
         });
     } catch (e) {
         c.status(411);
