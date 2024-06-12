@@ -45,7 +45,7 @@ export const BlogCard = ({
     </Link>
 }
 
-function Dot() {
+export function Dot() {
     return <div className="flex flex-col justify-center px-1">
         <div className="w-1 h-1 bg-zinc-200 rounded-full" />
     </div>
