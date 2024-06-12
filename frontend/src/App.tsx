@@ -4,6 +4,7 @@ import { Signup } from './screens/Signup'
 import {  Blogs } from './screens/Blogs'
 import { Signin } from './screens/Signin'
 import { Blog } from './screens/Blog'
+import { Publish } from './screens/Publish'
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
           <Route path="/signin" element={<Signin />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/blog/:id" element={<Blog />} />
+          <Route path="/publish" element={<Publish />} />
         </Routes>
       </BrowserRouter>
 
